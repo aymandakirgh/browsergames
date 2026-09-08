@@ -665,6 +665,7 @@ function killBoom(){
   o.connect(g);g.connect(master);o.start();o.stop(AC.currentTime+1.1);
 }
 var stepT=0,hbT=0,entStepT=0,growlT=3;
+var heartbeatFlash=0; // transient bump to the fear vignette on each heartbeat, so the thump is felt as well as heard
 var sanity=100,whisperT=8,stingerT=22;
 var entPan=0; // stereo bearing of the entity relative to facing, updated each frame
 /* flashlight flicker is re-rolled on a fixed clock, not per frame — see tick() */
@@ -715,7 +716,7 @@ function reset(){
   // audio/flicker timers carried leftover values from the previous life across
   // a retry — e.g. growlT could already be deep negative after a long run, so
   // a fresh descent could growl on frame 1 instead of after the intended lull
-  stepT=0;hbT=0;entStepT=0;growlT=3;flickerT=0;flickerOn=true;huntFlickerOn=true;
+  stepT=0;hbT=0;entStepT=0;growlT=3;flickerT=0;flickerOn=true;huntFlickerOn=true;heartbeatFlash=0;
   startTime=performance.now();
 }
 function begin(){
@@ -1034,10 +1035,12 @@ function tick(){
 
     /* --- fear feedback --- */
     var fear=Math.max(0,1-dEnt/12);
-    $('fear').style.opacity=Math.max(fear,(100-sanity)/280)*0.9;
     if(droneGain)droneGain.gain.value=0.05+fear*0.1+(100-sanity)*0.0008;
     hbT-=dt;
-    if(fear>0.1&&hbT<=0){hbT=0.9-fear*0.55;heartbeat();}
+    if(fear>0.1&&hbT<=0){hbT=0.9-fear*0.55;heartbeat();heartbeatFlash=1;}
+    heartbeatFlash=Math.max(0,heartbeatFlash-dt*4.5); // ~0.22s decay per thump
+    // heartbeat sound gets a matching visual thump on the fear vignette
+    $('fear').style.opacity=Math.min(1,Math.max(fear,(100-sanity)/280)*0.9+heartbeatFlash*0.1);
     /* whispers at low sanity */
     whisperT-=dt;
     if(sanity<65&&whisperT<=0){whisperT=6+Math.random()*10;whisper();}

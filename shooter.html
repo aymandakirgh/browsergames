@@ -384,6 +384,10 @@ document.addEventListener('pointerlockchange',function(){
 
 /* ================= UI ================= */
 function $(id){return document.getElementById(id);}
+// crosshair spread lines are written every frame — cache the 4 elements once
+// instead of running document.querySelector('#ch .t' etc.) 240x/sec
+var chT=document.querySelector('#ch .t'),chB=document.querySelector('#ch .b'),
+    chL=document.querySelector('#ch .l'),chR=document.querySelector('#ch .r');
 function show(id){['title','pause','death'].forEach(function(s){$(s).classList.toggle('hidden',s!==id);});}
 function hideAll(){['title','pause','death'].forEach(function(s){$(s).classList.add('hidden');});}
 function banner(msg,ms){
@@ -764,10 +768,10 @@ function tick(){
 
     /* crosshair spread */
     var sp=(aiming?2:6)+recoil*220;
-    document.querySelector('#ch .t').style.top=(-sp-8)+'px';
-    document.querySelector('#ch .b').style.top=sp+'px';
-    document.querySelector('#ch .l').style.left=(-sp-8)+'px';
-    document.querySelector('#ch .r').style.left=sp+'px';
+    chT.style.top=(-sp-8)+'px';
+    chB.style.top=sp+'px';
+    chL.style.left=(-sp-8)+'px';
+    chR.style.left=sp+'px';
 
     /* firing */
     fireT-=dt;
