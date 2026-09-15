@@ -745,15 +745,31 @@ function die(){
   var x=cv.getContext('2d');
   x.fillStyle='#000';x.fillRect(0,0,cv.width,cv.height);
   var cx=cv.width/2,cy=cv.height/2;
-  x.fillStyle='#ff7a1a';
+  // three jumpscare variants (eye colour + mouth shape) picked per death so
+  // repeated retries — which this game expects a lot of — don't stare back
+  // with the identical still every time
+  var variant=Math.floor(Math.random()*3);
+  x.fillStyle=['#ff7a1a','#c81616','#e8e4d8'][variant];
   x.beginPath();x.ellipse(cx-110,cy-60,46,70,0.1,0,Math.PI*2);x.fill();
   x.beginPath();x.ellipse(cx+110,cy-60,46,70,-0.1,0,Math.PI*2);x.fill();
   x.fillStyle='#000';
   x.beginPath();x.ellipse(cx-110,cy-50,14,30,0,0,Math.PI*2);x.fill();
   x.beginPath();x.ellipse(cx+110,cy-50,14,30,0,0,Math.PI*2);x.fill();
   x.strokeStyle='#1a1a1a';x.lineWidth=3;
-  x.beginPath();x.moveTo(cx-70,cy+120);
-  x.bezierCurveTo(cx-20,cy+170,cx+20,cy+170,cx+70,cy+120);x.stroke();
+  if(variant===1){
+    // wide screaming maw instead of a closed curve
+    x.fillStyle='#0a0a0a';
+    x.beginPath();x.ellipse(cx,cy+150,55,40,0,0,Math.PI*2);x.fill();
+  }else if(variant===2){
+    // jagged zigzag grin
+    var mx=cx-70,my=cy+120;
+    x.beginPath();x.moveTo(mx,my);
+    for(var zz=0;zz<6;zz++){mx+=140/6;my+=(zz%2===0?18:-18);x.lineTo(mx,my);}
+    x.stroke();
+  }else{
+    x.beginPath();x.moveTo(cx-70,cy+120);
+    x.bezierCurveTo(cx-20,cy+170,cx+20,cy+170,cx+70,cy+120);x.stroke();
+  }
   sc.style.opacity=1;
   var shakes=0,shaker=setInterval(function(){
     cv.style.transform='translate('+(Math.random()*30-15)+'px,'+(Math.random()*30-15)+'px)';

@@ -19,6 +19,7 @@ First-person horror in a procedurally generated maze.
 - **Distraction throwable:** three pebbles per run (G). A thrown pebble lands 2-4 cells down whichever cardinal corridor you're facing (stopping early at a wall) and, if the entity is close enough to hear it land, feeds that cell into the same `investigate()` gear your footsteps trigger — it goes to check the noise instead of you. Wasted if the entity's too far away to hear it, or already mid-hunt. The pebble counter tints red once you're out.
 - **Settings menu** (pause → SETTINGS): mouse sensitivity (0.4x-2x) and master volume sliders. Plain in-memory state, resets on reload by design — same as the rest of the game's state
 - The heartbeat cue now lands with a matching visual thump on the fear vignette, so mounting dread is felt as well as heard instead of relying on audio alone
+- The death jumpscare now picks one of three faces (eye colour + mouth shape) at random, so repeated retries — which this game expects a lot of — don't stare back with the identical still every time
 
 > **Difficulty note:** the entity can now actually catch you. Proximity was measured in 3D against a camera sitting 1.65m above an entity standing on the floor, so the grab distance could never fall below 1.65 — while the kill threshold was 1.55. The game was unloseable. Distances are now measured on the floor plane and the grab is re-tested after the entity moves.
 
@@ -43,6 +44,7 @@ Wave-based arena FPS.
 - **Pooled projectiles & pickups:** the last two unpooled spawns — enemy shots and health/ammo drops — now come from free lists with shared geometry and cached-by-type materials, same as the enemy rigs and particle effects above
 - **Ammo feedback:** the ammo counter tints red at 5 rounds or fewer, and holding fire with an empty mag *and* empty reserve now plays a throttled dry-click instead of firing silently forever — `startReload()` no-ops once reserve is also empty, and that path never touched the fire-rate cooldown, so it used to retrigger every frame with no cue
 - **Settings menu** (pause → SETTINGS): mouse sensitivity (0.4x-2x, also scales the aim-down-sights multiplier) and master volume sliders
+- **Kill combos:** consecutive kills inside a 2.2s window stack a score bonus (+20 per kill in the streak) and a banner — DOUBLE/TRIPLE/QUAD KILL, RAMPAGE at 5+ — with its own chime distinct from a normal kill. Rewards clearing a cluster fast over picking enemies off one at a time; any gap longer than the window resets the streak
 
 Controls: WASD · mouse aim · hold LMB fire · RMB aim down sights · R reload · SHIFT sprint · SPACE jump
 

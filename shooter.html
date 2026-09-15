@@ -122,6 +122,8 @@ var wave=0, score=0, kills=0, betweenT=0, inWave=false;
 var enemies=[], projectiles=[], pickups=[], particles=[], tracers=[];
 var shake=0, recoil=0, lowHpT=0, meleeSfxT=0, emptyClickT=0;
 var nextWaveSec=-1; // last whole-second shown in the between-wave countdown
+var comboT=0, comboCount=0; // kill-combo window — see killEnemy()
+var comboLabels={2:'DOUBLE KILL',3:'TRIPLE KILL',4:'QUAD KILL'};
 /* reusable temp vectors — avoid per-frame allocations in movement + enemy AI */
 var tmpF=new THREE.Vector3(), tmpR=new THREE.Vector3(), tmpWish=new THREE.Vector3(),
     tmpToP=new THREE.Vector3(), tmpMove=new THREE.Vector3(), tmpStrafe=new THREE.Vector3();
@@ -351,6 +353,7 @@ function sfxEnemyShot(){tone(300,0.12,'sawtooth',0.12,160);}
 function sfxWave(){tone(220,0.3,'sine',0.25);setTimeout(function(){tone(330,0.4,'sine',0.22);},180);}
 function sfxWaveClear(){tone(440,0.12,'sine',0.22);setTimeout(function(){tone(660,0.16,'sine',0.2);},130);setTimeout(function(){tone(880,0.22,'sine',0.18);},260);}
 function sfxEmpty(){tone(200,0.03,'square',0.08);setTimeout(function(){tone(160,0.03,'square',0.08);},70);}
+function sfxCombo(n){tone(Math.min(660+n*50,1100),0.11,'square',0.22);}
 
 /* ================= INPUT ================= */
 addEventListener('keydown',function(e){
@@ -415,7 +418,7 @@ function reset(){
   enemies=[];projectiles=[];pickups=[];particles=[];tracers=[];
   hp=100;ammo=MAG;reserve=120;reloading=false;
   wave=0;score=0;kills=0;inWave=false;betweenT=1.5;nextWaveSec=-1;
-  meleeSfxT=0;emptyClickT=0;lowHpT=0;
+  meleeSfxT=0;emptyClickT=0;lowHpT=0;comboT=0;comboCount=0;
   pos.set(0,EYE,0);vel.set(0,0,0);vy=0;yaw=0;pitch=0;
   aiming=false;camera.fov=75;camera.updateProjectionMatrix(); // clear any ADS zoom from a prior run
   updateHud();
@@ -521,6 +524,17 @@ function killEnemy(e,headshot){
   kills++;
   score+=headshot?150:100;
   sfxKill();
+  // kill combo: consecutive kills inside a short window stack a score bonus
+  // and a banner — rewards clearing a cluster fast instead of picking them
+  // off one at a time. Window resets on any gap longer than comboT.
+  comboCount=comboT>0?comboCount+1:1;
+  comboT=2.2;
+  if(comboCount>=2){
+    var comboBonus=(comboCount-1)*20;
+    score+=comboBonus;
+    banner((comboLabels[comboCount]||'RAMPAGE')+' +'+comboBonus,1100);
+    sfxCombo(comboCount);
+  }
   burst(e.group.position.clone().add(new THREE.Vector3(0,1.2,0)),18,0xff3020);
   // tumbling debris chunks
   for(var ci=0;ci<5;ci++){
@@ -803,6 +817,7 @@ function tick(){
 
     /* enemies */
     meleeSfxT-=dt; // one cooldown for the whole frame, not one per enemy
+    comboT=Math.max(0,comboT-dt); // combo window ticks down; killEnemy() checks it before resetting the streak
     enemies.forEach(function(e){
       var g=e.group;
       var toP=tmpToP.set(pos.x-g.position.x,0,pos.z-g.position.z);
