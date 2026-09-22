@@ -20,6 +20,8 @@ First-person horror in a procedurally generated maze.
 - **Settings menu** (pause → SETTINGS): mouse sensitivity (0.4x-2x) and master volume sliders. Plain in-memory state, resets on reload by design — same as the rest of the game's state
 - The heartbeat cue now lands with a matching visual thump on the fear vignette, so mounting dread is felt as well as heard instead of relying on audio alone
 - The death jumpscare now picks one of three faces (eye colour + mouth shape) at random, so repeated retries — which this game expects a lot of — don't stare back with the identical still every time
+- The entity's eyes burn a hotter red while it's actively hunting (vs. its normal amber glow) — a visual tell you can read even with the flashlight off, alongside the scream/growl cues
+- Fixed a collision gap: the entity's waypoint-following movement (roam/investigate, and hunts where it can't see you) never clamped against the maze walls, only its direct line-of-sight chase did — a corner-cutting step between two cell centers could let it poke through a wall
 
 > **Difficulty note:** the entity can now actually catch you. Proximity was measured in 3D against a camera sitting 1.65m above an entity standing on the floor, so the grab distance could never fall below 1.65 — while the kill threshold was 1.55. The game was unloseable. Distances are now measured on the floor plane and the grab is re-tested after the entity moves.
 
@@ -45,6 +47,7 @@ Wave-based arena FPS.
 - **Ammo feedback:** the ammo counter tints red at 5 rounds or fewer, and holding fire with an empty mag *and* empty reserve now plays a throttled dry-click instead of firing silently forever — `startReload()` no-ops once reserve is also empty, and that path never touched the fire-rate cooldown, so it used to retrigger every frame with no cue
 - **Settings menu** (pause → SETTINGS): mouse sensitivity (0.4x-2x, also scales the aim-down-sights multiplier) and master volume sliders
 - **Kill combos:** consecutive kills inside a 2.2s window stack a score bonus (+20 per kill in the streak) and a banner — DOUBLE/TRIPLE/QUAD KILL, RAMPAGE at 5+ — with its own chime distinct from a normal kill. Rewards clearing a cluster fast over picking enemies off one at a time; any gap longer than the window resets the streak
+- **Low-ammo cue:** a one-shot chime when the mag first drops to 5 rounds or fewer (same re-arm-on-refill pattern as horror.html's battery warning), so you get an audible nudge to reload alongside the ammo counter tinting red
 
 Controls: WASD · mouse aim · hold LMB fire · RMB aim down sights · R reload · SHIFT sprint · SPACE jump
 

@@ -328,13 +328,14 @@ function spawnExit(){
 
 /* ================= ENTITY ================= */
 var entity=new THREE.Group();
+var eyeMat=null; // hoisted out of the build IIFE so tick() can tint it by hunt state
 (function(){
   var bodyMat=new THREE.MeshStandardMaterial({color:0x050505,roughness:1});
   var body=new THREE.Mesh(new THREE.CylinderGeometry(0.32,0.45,2.3,10),bodyMat);
   body.position.y=1.15;entity.add(body);
   var head=new THREE.Mesh(new THREE.SphereGeometry(0.3,12,10),bodyMat);
   head.position.y=2.5;head.scale.y=1.35;entity.add(head);
-  var eyeMat=new THREE.MeshBasicMaterial({color:0xff7a1a});
+  eyeMat=new THREE.MeshBasicMaterial({color:0xff7a1a});
   var e1=new THREE.Mesh(new THREE.SphereGeometry(0.045,8,8),eyeMat);
   var e2=e1.clone();
   e1.position.set(-0.1,2.58,0.26);e2.position.set(0.1,2.58,0.26);
@@ -1011,11 +1012,19 @@ function tick(){
         var moveSpd=ent.mode==='hunt'?huntSpd:(ent.mode==='investigate'?2.4:1.7);
         ed.normalize().multiplyScalar(moveSpd*dt);
         entity.position.add(ed);
+        // the direct hunt-chase branch above already clamps against wallBoxes;
+        // waypoint-following never did, so a corner-cutting step between two
+        // cell centers could let the entity's collider poke through a wall
+        collideAt(entity.position,0.32);
         entity.rotation.y=Math.atan2(ed.x,ed.z);
         entMoved=true;
       }
     }
     entity.position.y=Math.sin(t*3)*0.04;
+    // hunting eyes: a hotter, more saturated glow while it's actively hunting —
+    // a visual tell readable even with the flashlight off, alongside the
+    // scream/growl audio cues that already mark the hunt state
+    if(eyeMat)eyeMat.color.setHex(ent.mode==='hunt'?0xff1a0a:0xff7a1a);
 
     /* entity sounds: footsteps + growls + breathing, volume by distance */
     if(entMoved){

@@ -120,7 +120,7 @@ var pos=new THREE.Vector3(0,EYE,0), vel=new THREE.Vector3(), vy=0, grounded=true
 var hp=100, ammo=MAG, reserve=120, reloading=false, reloadT=0, fireT=0;
 var wave=0, score=0, kills=0, betweenT=0, inWave=false;
 var enemies=[], projectiles=[], pickups=[], particles=[], tracers=[];
-var shake=0, recoil=0, lowHpT=0, meleeSfxT=0, emptyClickT=0;
+var shake=0, recoil=0, lowHpT=0, meleeSfxT=0, emptyClickT=0, ammoWarned=false;
 var nextWaveSec=-1; // last whole-second shown in the between-wave countdown
 var comboT=0, comboCount=0; // kill-combo window — see killEnemy()
 var comboLabels={2:'DOUBLE KILL',3:'TRIPLE KILL',4:'QUAD KILL'};
@@ -418,7 +418,7 @@ function reset(){
   enemies=[];projectiles=[];pickups=[];particles=[];tracers=[];
   hp=100;ammo=MAG;reserve=120;reloading=false;
   wave=0;score=0;kills=0;inWave=false;betweenT=1.5;nextWaveSec=-1;
-  meleeSfxT=0;emptyClickT=0;lowHpT=0;comboT=0;comboCount=0;
+  meleeSfxT=0;emptyClickT=0;lowHpT=0;comboT=0;comboCount=0;ammoWarned=false;
   pos.set(0,EYE,0);vel.set(0,0,0);vy=0;yaw=0;pitch=0;
   aiming=false;camera.fov=75;camera.updateProjectionMatrix(); // clear any ADS zoom from a prior run
   updateHud();
@@ -471,6 +471,10 @@ function fire(){
     return;
   }
   ammo--;fireT=FIRE_RATE;
+  // one-shot low-ammo cue, same re-arm-on-refill idiom as horror.html's
+  // battery warning: fires once when the mag first drops to 5 or fewer,
+  // and only re-arms once a reload tops it back up
+  if(ammo<=5&&!ammoWarned){ammoWarned=true;tone(880,0.08,'square',0.12);}
   recoil=Math.min(recoil+0.025,0.09);
   shake=Math.min(shake+0.12,0.4);
   sfxShot();
@@ -798,6 +802,7 @@ function tick(){
         reloading=false;gun.rotation.x=0;
         var need=MAG-ammo,take=Math.min(need,reserve);
         ammo+=take;reserve-=take;
+        ammoWarned=false; // a fresh mag re-arms the low-ammo cue
         updateHud();
       }
     }
