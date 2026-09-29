@@ -323,6 +323,7 @@ function spawnExit(){
   exitMesh.position.set(c.x,1.3,c.z+CELL/2-0.4);
   scene.add(exitMesh);
   exitOpen=true;
+  doorGroan();
   hint('THE DOOR IS OPEN. SOUTH-EAST CORNER. RUN.');
 }
 
@@ -609,6 +610,22 @@ function clatter(vol,pan){
   var bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=2600;bp.Q.value=1.2;
   var g=AC.createGain();g.gain.value=vol||0.3;
   src.connect(bp);bp.connect(g);panTo(g,pan);src.start();
+}
+function doorGroan(){
+  // the exit unlocking — a low metallic creak plus a bolt-release thud,
+  // distinct from the entity's growl/screech so it reads as environmental
+  if(!AC)return;
+  var dur=0.9;
+  var buf=AC.createBuffer(1,AC.sampleRate*dur,AC.sampleRate);
+  var d=buf.getChannelData(0);
+  for(var i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(i/d.length,0.3)*Math.pow(1-i/d.length,0.6);
+  var src=AC.createBufferSource();src.buffer=buf;
+  var bp=AC.createBiquadFilter();bp.type='bandpass';bp.Q.value=3;
+  bp.frequency.setValueAtTime(260,AC.currentTime);
+  bp.frequency.exponentialRampToValueAtTime(520,AC.currentTime+dur);
+  var g=AC.createGain();g.gain.value=0.26;
+  src.connect(bp);bp.connect(g);g.connect(master);src.start();
+  thud(0.3);
 }
 function whisper(){
   if(!AC)return;

@@ -354,6 +354,8 @@ function sfxWave(){tone(220,0.3,'sine',0.25);setTimeout(function(){tone(330,0.4,
 function sfxWaveClear(){tone(440,0.12,'sine',0.22);setTimeout(function(){tone(660,0.16,'sine',0.2);},130);setTimeout(function(){tone(880,0.22,'sine',0.18);},260);}
 function sfxEmpty(){tone(200,0.03,'square',0.08);setTimeout(function(){tone(160,0.03,'square',0.08);},70);}
 function sfxCombo(n){tone(Math.min(660+n*50,1100),0.11,'square',0.22);}
+function sfxJump(){tone(320,0.07,'square',0.12,520);}
+function sfxLand(){noiseBurst(0.08,220,0.22,1.4);tone(90,0.09,'sine',0.15,50);}
 
 /* ================= INPUT ================= */
 addEventListener('keydown',function(e){
@@ -752,11 +754,14 @@ function tick(){
     pos.x+=vel.x*dt;pos.z+=vel.z*dt;
     collideAABBs(pos,PLAYER_R,pos.y-EYE);
     // jump / gravity / platform landing
-    if(keys.Space&&grounded){vy=JUMP;grounded=false;}
+    if(keys.Space&&grounded){vy=JUMP;grounded=false;sfxJump();}
     vy-=GRAV*dt;
     pos.y+=vy*dt;
     var gh=groundAt(pos,PLAYER_R);
-    if(vy<=0&&pos.y<=gh+EYE+0.01){pos.y=gh+EYE;vy=0;grounded=true;}
+    if(vy<=0&&pos.y<=gh+EYE+0.01){
+      if(vy<-3)sfxLand();
+      pos.y=gh+EYE;vy=0;grounded=true;
+    }
     else if(pos.y-EYE>gh+0.06)grounded=false;
 
     /* camera + shake + recoil */
