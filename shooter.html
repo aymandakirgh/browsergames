@@ -121,6 +121,7 @@ var hp=100, ammo=MAG, reserve=120, reloading=false, reloadT=0, fireT=0;
 var wave=0, score=0, kills=0, betweenT=0, inWave=false;
 var enemies=[], projectiles=[], pickups=[], particles=[], tracers=[];
 var shake=0, recoil=0, lowHpT=0, meleeSfxT=0, emptyClickT=0, ammoWarned=false;
+var stepPhase=0; // sign of the last camera-bob sample — drives footstep SFX timing
 var nextWaveSec=-1; // last whole-second shown in the between-wave countdown
 var comboT=0, comboCount=0; // kill-combo window — see killEnemy()
 var comboLabels={2:'DOUBLE KILL',3:'TRIPLE KILL',4:'QUAD KILL'};
@@ -356,6 +357,7 @@ function sfxEmpty(){tone(200,0.03,'square',0.08);setTimeout(function(){tone(160,
 function sfxCombo(n){tone(Math.min(660+n*50,1100),0.11,'square',0.22);}
 function sfxJump(){tone(320,0.07,'square',0.12,520);}
 function sfxLand(){noiseBurst(0.08,220,0.22,1.4);tone(90,0.09,'sine',0.15,50);}
+function sfxStep(sprinting){noiseBurst(0.045,sprinting?700:480,sprinting?0.07:0.05,2.4);}
 
 /* ================= INPUT ================= */
 addEventListener('keydown',function(e){
@@ -420,7 +422,7 @@ function reset(){
   enemies=[];projectiles=[];pickups=[];particles=[];tracers=[];
   hp=100;ammo=MAG;reserve=120;reloading=false;
   wave=0;score=0;kills=0;inWave=false;betweenT=1.5;nextWaveSec=-1;
-  meleeSfxT=0;emptyClickT=0;lowHpT=0;comboT=0;comboCount=0;ammoWarned=false;
+  meleeSfxT=0;emptyClickT=0;lowHpT=0;comboT=0;comboCount=0;ammoWarned=false;stepPhase=0;
   pos.set(0,EYE,0);vel.set(0,0,0);vy=0;yaw=0;pitch=0;
   aiming=false;camera.fov=75;camera.updateProjectionMatrix(); // clear any ADS zoom from a prior run
   updateHud();
@@ -770,6 +772,12 @@ function tick(){
     var sx=(Math.random()-0.5)*shake*0.06,sy=(Math.random()-0.5)*shake*0.06;
     var speedNow=Math.sqrt(vel.x*vel.x+vel.z*vel.z);
     var bob=Math.sin(t*(sprinting?14:10))*0.025*Math.min(1,speedNow/WALK)*(grounded?1:0);
+    // footstep SFX: one thud per bob half-cycle while actually moving on the ground —
+    // reuses the bob's own sine instead of a separate timer, so the cue stays locked to the visual step
+    if(grounded&&speedNow>1.2){
+      if(stepPhase<=0&&bob>0)sfxStep(sprinting);
+      stepPhase=bob;
+    }else stepPhase=0;
     camera.position.set(pos.x+sx,pos.y+bob+sy,pos.z);
     camera.rotation.set(0,0,0);
     camera.rotateY(yaw);camera.rotateX(pitch+recoil);

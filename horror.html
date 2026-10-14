@@ -803,7 +803,12 @@ function die(){
 function winGame(){
   state='win';
   document.exitPointerLock();
-  blip(523,0.4,'sine',0.3);blip(784,0.6,'sine',0.25);
+  // ascending major arpeggio (C5-E5-G5-C6) — escape is the game's one win
+  // state, it earns a fuller cue than the old two-note blip
+  blip(523,0.35,'sine',0.28);
+  setTimeout(function(){blip(659,0.35,'sine',0.26);},140);
+  setTimeout(function(){blip(784,0.4,'sine',0.25);},280);
+  setTimeout(function(){blip(1047,0.6,'sine',0.3);},420);
   var t=((performance.now()-startTime)/1000).toFixed(1);
   $('win-stats').textContent='All pages recovered in '+t+' seconds. It is still down there.';
   show('win');$('hud').classList.remove('on');
