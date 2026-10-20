@@ -44,7 +44,7 @@ canvas{display:block}
   background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.85) 100%)}
 #fear{position:fixed;inset:0;z-index:6;pointer-events:none;opacity:0;
   background:radial-gradient(ellipse at center,transparent 30%,rgba(80,0,0,.55) 100%);transition:opacity .3s}
-#flash{position:fixed;inset:0;z-index:30;pointer-events:none;background:#fff;opacity:0}
+#flash{position:fixed;inset:0;z-index:30;pointer-events:none;background:#fff;opacity:0;transition:opacity .35s ease}
 #scare{position:fixed;inset:0;z-index:25;pointer-events:none;opacity:0;background:#000}
 #scare canvas{position:absolute;inset:0;width:100%;height:100%}
 #crosshair{position:fixed;top:50%;left:50%;width:4px;height:4px;margin:-2px;border-radius:50%;
@@ -648,6 +648,17 @@ function whisper(){
   }else g.connect(master);
   src.start();
 }
+function whisperFlash(){
+  // a near-subliminal flash timed to each whisper cue — paranoia caught at
+  // the edge of vision rather than a jumpscare; faint and brief enough that
+  // it never reads as a hit marker or light toggle
+  var el=$('flash');
+  el.style.transition='none';
+  el.style.opacity=0.05+Math.random()*0.04;
+  void el.offsetWidth; // force reflow so the fade-out transition re-applies next frame
+  el.style.transition='opacity .35s ease';
+  el.style.opacity=0;
+}
 function distantScream(){
   if(!AC)return;
   var dl=AC.createDelay();dl.delayTime.value=0.25;
@@ -1090,7 +1101,7 @@ function tick(){
     $('fear').style.opacity=Math.min(1,Math.max(fear,(100-sanity)/280)*0.9+heartbeatFlash*0.1);
     /* whispers at low sanity */
     whisperT-=dt;
-    if(sanity<65&&whisperT<=0){whisperT=6+Math.random()*10;whisper();}
+    if(sanity<65&&whisperT<=0){whisperT=6+Math.random()*10;whisper();whisperFlash();}
     /* ambient stingers: distant screams + knocking */
     stingerT-=dt;
     if(stingerT<=0){

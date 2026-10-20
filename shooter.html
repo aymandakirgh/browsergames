@@ -53,6 +53,10 @@ canvas{display:block}
 @keyframes lowpulse{0%,100%{opacity:.12}50%{opacity:.68}}
 #vig{position:fixed;inset:0;z-index:5;pointer-events:none;
   background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55) 100%)}
+#hit-dir-wrap{position:fixed;top:50%;left:50%;width:0;height:0;z-index:8;pointer-events:none}
+#hit-dir{position:absolute;left:-11px;top:-180px;width:0;height:0;
+  border-left:11px solid transparent;border-right:11px solid transparent;
+  border-bottom:18px solid rgba(210,47,47,.9);opacity:0}
 </style>
 </head>
 <body>
@@ -60,6 +64,7 @@ canvas{display:block}
 <div id="vig"></div>
 <div id="dmg-vig"></div>
 <div id="low-vig"></div>
+<div id="hit-dir-wrap"><div id="hit-dir"></div></div>
 <div id="ch"><span class="ch-l t"></span><span class="ch-l b"></span><span class="ch-l l"></span><span class="ch-l r"></span></div>
 <div id="hitmark">+</div>
 
@@ -566,6 +571,25 @@ function killEnemy(e,headshot){
     sfxWaveClear();
   }
 }
+/* Directional damage indicator: a chevron on the screen edge rotated to point
+   at the source of the hit — melee contact or an enemy projectile — relative
+   to the player's current facing. Standard FPS readability feature; this
+   game had no way to tell which side a hit came from without turning to look. */
+var hitDirT=null;
+function damageFrom(sx,sz){
+  var dx=sx-pos.x,dz=sz-pos.z;
+  var fwdX=-Math.sin(yaw),fwdZ=-Math.cos(yaw);
+  var rightX=-fwdZ,rightZ=fwdX;
+  var fComp=dx*fwdX+dz*fwdZ,rComp=dx*rightX+dz*rightZ;
+  var deg=Math.atan2(rComp,fComp)*180/Math.PI;
+  var wrap=$('hit-dir-wrap'),el=$('hit-dir');
+  wrap.style.transform='rotate('+deg+'deg)';
+  el.style.transition='none';el.style.opacity=1;
+  void el.offsetWidth; // force reflow so the fade-out transition re-applies on repeat hits
+  el.style.transition='opacity .6s ease';
+  el.style.opacity=0;
+  clearTimeout(hitDirT);hitDirT=setTimeout(function(){el.style.opacity=0;},650);
+}
 function hitmark(big){
   var h=$('hitmark');
   h.style.color=big?'#ff3020':'#ffb340';
@@ -896,6 +920,7 @@ function tick(){
           meleeSfxT=0.32;
           sfxHurt();
           shake=Math.min(shake+0.16,0.45);
+          damageFrom(g.position.x,g.position.z);
         }
         if(hp<=0){hp=0;updateHud();die();}
       }
@@ -913,6 +938,7 @@ function tick(){
       if(hitPlayer){
         hp-=12;sfxHurt();shake=Math.min(shake+0.3,0.5);
         $('dmg-vig').style.opacity=0.9;
+        damageFrom(p.mesh.position.x,p.mesh.position.z);
         updateHud();
         if(hp<=0){releaseProjectile(p.mesh);projectiles.splice(i,1);die();continue;}
       }

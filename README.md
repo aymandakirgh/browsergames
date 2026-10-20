@@ -24,6 +24,7 @@ First-person horror in a procedurally generated maze.
 - Fixed a collision gap: the entity's waypoint-following movement (roam/investigate, and hunts where it can't see you) never clamped against the maze walls, only its direct line-of-sight chase did — a corner-cutting step between two cell centers could let it poke through a wall
 - The exit door now groans open (a low metallic creak + bolt-release thud) when it unlocks, instead of silently swapping in a green mesh with just a HUD hint
 - The escape chime is now a 4-note ascending arpeggio (C5-E5-G5-C6) instead of a flat two-note blip — escape is the game's only win state, so it gets a fuller cue than a HUD alert
+- Whispers at low sanity now pair with a near-subliminal screen flash — a flicker you catch at the edge of vision, faint enough it never reads as a hit marker or the flashlight toggling
 
 > **Difficulty note:** the entity can now actually catch you. Proximity was measured in 3D against a camera sitting 1.65m above an entity standing on the floor, so the grab distance could never fall below 1.65 — while the kill threshold was 1.55. The game was unloseable. Distances are now measured on the floor plane and the grab is re-tested after the entity moves.
 
@@ -53,6 +54,7 @@ Wave-based arena FPS.
 - **Jump/landing audio:** a takeoff whoosh on jump and a landing thud on touchdown from a real fall — jumping and landing were previously silent
 
 - **Footstep audio:** a quiet thud now lands on each step while moving on the ground, timed off the same bob cycle that drives the camera sway (sprinting steps are quicker and a touch louder than walking) — movement was previously silent apart from jump/landing
+- **Directional damage indicator:** a chevron flashes on the screen edge, rotated to point toward whatever just hit you — a melee frame or an enemy projectile — relative to your current facing. Previously the only tell for an off-screen hit was the integrity bar dropping; now you know which way to turn
 
 Controls: WASD · mouse aim · hold LMB fire · RMB aim down sights · R reload · SHIFT sprint · SPACE jump
 
