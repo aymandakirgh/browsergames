@@ -18,6 +18,7 @@ First-person horror in a procedurally generated maze.
 - The flashlight's proximity and hunt flicker run on a fixed ~14Hz clock, so the strobe looks the same on a 60Hz and a 144Hz display
 - **Distraction throwable:** three pebbles per run (G). A thrown pebble lands 2-4 cells down whichever cardinal corridor you're facing (stopping early at a wall) and, if the entity is close enough to hear it land, feeds that cell into the same `investigate()` gear your footsteps trigger — it goes to check the noise instead of you. Wasted if the entity's too far away to hear it, or already mid-hunt. The pebble counter tints red once you're out.
 - **Settings menu** (pause → SETTINGS): mouse sensitivity (0.4x-2x) and master volume sliders. Plain in-memory state, resets on reload by design — same as the rest of the game's state
+- **Difficulty select** (title screen, EASY/NORMAL/HARD, defaults to NORMAL): scales how often it decides to hunt, how fast sanity drains, and how long it waits between hunt checks. EASY is gentler on all three, HARD tightens them — the choice persists across retries since it's picked once up front, not part of the per-run reset
 - The heartbeat cue now lands with a matching visual thump on the fear vignette, so mounting dread is felt as well as heard instead of relying on audio alone
 - The death jumpscare now picks one of three faces (eye colour + mouth shape) at random, so repeated retries — which this game expects a lot of — don't stare back with the identical still every time
 - The entity's eyes burn a hotter red while it's actively hunting (vs. its normal amber glow) — a visual tell you can read even with the flashlight off, alongside the scream/growl cues
@@ -55,6 +56,7 @@ Wave-based arena FPS.
 
 - **Footstep audio:** a quiet thud now lands on each step while moving on the ground, timed off the same bob cycle that drives the camera sway (sprinting steps are quicker and a touch louder than walking) — movement was previously silent apart from jump/landing
 - **Directional damage indicator:** a chevron flashes on the screen edge, rotated to point toward whatever just hit you — a melee frame or an enemy projectile — relative to your current facing. Previously the only tell for an off-screen hit was the integrity bar dropping; now you know which way to turn
+- **Reload progress bar:** a thin bar under the ammo counter fills over the reload's duration and disappears the moment the mag is topped up — previously the only reload feedback was the gun dipping and the sound cue, with nothing showing how much longer it would take
 
 Controls: WASD · mouse aim · hold LMB fire · RMB aim down sights · R reload · SHIFT sprint · SPACE jump
 

@@ -31,6 +31,9 @@ canvas{display:block}
 #ammo small{font-size:13px;color:#8a8a92}
 #ammo.low{color:#d22f2f}
 #reload-hint{position:fixed;bottom:70px;right:28px;font-size:12px;color:#ffb340;opacity:0}
+#reload-bar-wrap{position:fixed;bottom:50px;right:28px;width:140px;height:4px;border:1px solid #ffb340;opacity:0;transition:opacity .1s}
+#reload-bar-wrap.on{opacity:1}
+#reload-bar{height:100%;width:0%;background:#ffb340}
 #wave-info{position:fixed;top:22px;left:28px;font-size:13px;letter-spacing:2px}
 #wave-info.soon{color:#ffb340}
 #score{position:fixed;top:22px;right:28px;font-size:13px;letter-spacing:2px;text-align:right}
@@ -73,6 +76,7 @@ canvas{display:block}
   <div id="hp-wrap"><div id="hp"></div></div>
   <div id="ammo">30 <small>/ 120</small></div>
   <div id="reload-hint">[R] RELOAD</div>
+  <div id="reload-bar-wrap"><div id="reload-bar"></div></div>
   <div id="wave-info">WAVE 1</div>
   <div id="score">SCORE 0</div>
 </div>
@@ -425,7 +429,7 @@ function reset(){
   particles.forEach(function(p){releaseParticle(p.mesh);});
   tracers.forEach(function(t){releaseTracer(t.mesh);});
   enemies=[];projectiles=[];pickups=[];particles=[];tracers=[];
-  hp=100;ammo=MAG;reserve=120;reloading=false;
+  hp=100;ammo=MAG;reserve=120;reloading=false;$('reload-bar-wrap').classList.remove('on');
   wave=0;score=0;kills=0;inWave=false;betweenT=1.5;nextWaveSec=-1;
   meleeSfxT=0;emptyClickT=0;lowHpT=0;comboT=0;comboCount=0;ammoWarned=false;stepPhase=0;
   pos.set(0,EYE,0);vel.set(0,0,0);vy=0;yaw=0;pitch=0;
@@ -468,6 +472,7 @@ var raycaster=new THREE.Raycaster();
 function startReload(){
   if(state!=='play'||reloading||ammo===MAG||reserve<=0)return;
   reloading=true;reloadT=RELOAD_T;sfxReload();
+  $('reload-bar-wrap').classList.add('on');$('reload-bar').style.width='0%';
 }
 function fire(){
   if(reloading||ammo<=0){
@@ -835,8 +840,10 @@ function tick(){
     if(reloading){
       reloadT-=dt;
       gun.rotation.x=Math.sin((1-reloadT/RELOAD_T)*Math.PI)*0.7;
+      $('reload-bar').style.width=(100*(1-reloadT/RELOAD_T))+'%';
       if(reloadT<=0){
         reloading=false;gun.rotation.x=0;
+        $('reload-bar-wrap').classList.remove('on');
         var need=MAG-ammo,take=Math.min(need,reserve);
         ammo+=take;reserve-=take;
         ammoWarned=false; // a fresh mag re-arms the low-ammo cue
