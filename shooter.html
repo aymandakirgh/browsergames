@@ -101,6 +101,7 @@ canvas{display:block}
   <h1 style="font-size:22px">SETTINGS</h1>
   <div class="opt-row">MOUSE SENSITIVITY<input type="range" id="opt-sens" min="0.4" max="2" step="0.05" value="1"><span id="opt-sens-val">1.0</span></div>
   <div class="opt-row">VOLUME<input type="range" id="opt-vol" min="0" max="1" step="0.05" value="1"><span id="opt-vol-val">100%</span></div>
+  <div class="opt-row">FIELD OF VIEW<input type="range" id="opt-fov" min="60" max="90" step="1" value="75"><span id="opt-fov-val">75</span></div>
   <button class="btn" id="opt-back" style="font-size:12px;padding:8px 24px">BACK</button>
 </div>
 
@@ -123,7 +124,7 @@ var MAG=30, FIRE_RATE=0.105, DMG=34, HEAD_MULT=3, RELOAD_T=1.4;
 
 /* ================= STATE ================= */
 var state='title';
-var mouseSens=1,volMul=1; // settings: mouse sensitivity multiplier, master volume multiplier
+var mouseSens=1,volMul=1,baseFov=75; // settings: mouse sensitivity multiplier, master volume multiplier, base field of view (aim/sprint zoom offsets apply on top)
 var keys={}, mouseDown=false, aiming=false, yaw=0, pitch=0;
 var pos=new THREE.Vector3(0,EYE,0), vel=new THREE.Vector3(), vy=0, grounded=true;
 var hp=100, ammo=MAG, reserve=120, reloading=false, reloadT=0, fireT=0;
@@ -433,7 +434,7 @@ function reset(){
   wave=0;score=0;kills=0;inWave=false;betweenT=1.5;nextWaveSec=-1;
   meleeSfxT=0;emptyClickT=0;lowHpT=0;comboT=0;comboCount=0;ammoWarned=false;stepPhase=0;
   pos.set(0,EYE,0);vel.set(0,0,0);vy=0;yaw=0;pitch=0;
-  aiming=false;camera.fov=75;camera.updateProjectionMatrix(); // clear any ADS zoom from a prior run
+  aiming=false;camera.fov=baseFov;camera.updateProjectionMatrix(); // clear any ADS zoom from a prior run
   updateHud();
 }
 function begin(){
@@ -449,6 +450,7 @@ $('opt-open').addEventListener('click',function(){$('pause').classList.add('hidd
 $('opt-back').addEventListener('click',function(){$('settings').classList.add('hidden');$('pause').classList.remove('hidden');});
 $('opt-sens').addEventListener('input',function(e){mouseSens=parseFloat(e.target.value);$('opt-sens-val').textContent=mouseSens.toFixed(2);});
 $('opt-vol').addEventListener('input',function(e){volMul=parseFloat(e.target.value);$('opt-vol-val').textContent=Math.round(volMul*100)+'%';if(master)master.gain.value=0.55*volMul;});
+$('opt-fov').addEventListener('input',function(e){baseFov=parseFloat(e.target.value);$('opt-fov-val').textContent=baseFov;});
 
 function startWave(){
   wave++;inWave=true;nextWaveSec=-1;
@@ -810,8 +812,8 @@ function tick(){
     camera.position.set(pos.x+sx,pos.y+bob+sy,pos.z);
     camera.rotation.set(0,0,0);
     camera.rotateY(yaw);camera.rotateX(pitch+recoil);
-    // sprint FOV kick
-    var tFov=aiming?55:((sprinting&&speedNow>1)?82:75); // zoom in while aiming
+    // sprint FOV kick — offsets apply on top of the user's base FOV setting
+    var tFov=aiming?baseFov-20:((sprinting&&speedNow>1)?baseFov+7:baseFov); // zoom in while aiming
     camera.fov+=(tFov-camera.fov)*Math.min(1,dt*8);
     camera.updateProjectionMatrix();
     // gun sway

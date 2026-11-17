@@ -95,6 +95,7 @@ canvas{display:block}
   <h1 style="font-size:20px">SETTINGS</h1>
   <div class="opt-row">MOUSE SENSITIVITY<input type="range" id="opt-sens" min="0.4" max="2" step="0.05" value="1"><span id="opt-sens-val">1.0</span></div>
   <div class="opt-row">VOLUME<input type="range" id="opt-vol" min="0" max="1" step="0.05" value="1"><span id="opt-vol-val">100%</span></div>
+  <div class="opt-row">FIELD OF VIEW<input type="range" id="opt-fov" min="60" max="90" step="1" value="72"><span id="opt-fov-val">72</span></div>
   <button class="btn" id="opt-back" style="font-size:12px;padding:8px 24px">BACK</button>
 </div>
 
@@ -129,7 +130,7 @@ var PAGES_NEEDED=5;
 
 /* ================= STATE ================= */
 var state='title'; // title|play|pause|dead|win
-var mouseSens=1,volMul=1; // settings: mouse sensitivity multiplier, master volume multiplier
+var mouseSens=1,volMul=1,baseFov=72; // settings: mouse sensitivity multiplier, master volume multiplier, base field of view
 var difficulty='normal'; // easy|normal|hard — picked on the title screen, persists across retries
 var DIFF={easy:{hunt:0.7,drain:0.8,calm:1.3},normal:{hunt:1,drain:1,calm:1},hard:{hunt:1.4,drain:1.22,calm:0.72}};
 var keys={}, yaw=0, pitch=0;
@@ -770,6 +771,7 @@ $('opt-open').addEventListener('click',function(){$('pause').classList.add('hidd
 $('opt-back').addEventListener('click',function(){$('settings').classList.add('hidden');$('pause').classList.remove('hidden');});
 $('opt-sens').addEventListener('input',function(e){mouseSens=parseFloat(e.target.value);$('opt-sens-val').textContent=mouseSens.toFixed(2);});
 $('opt-vol').addEventListener('input',function(e){volMul=parseFloat(e.target.value);$('opt-vol-val').textContent=Math.round(volMul*100)+'%';if(master)master.gain.value=0.7*volMul;});
+$('opt-fov').addEventListener('input',function(e){baseFov=parseFloat(e.target.value);$('opt-fov-val').textContent=baseFov;camera.fov=baseFov;camera.updateProjectionMatrix();});
 document.querySelectorAll('.diff-btn').forEach(function(b){
   b.addEventListener('click',function(){
     difficulty=b.getAttribute('data-diff');
